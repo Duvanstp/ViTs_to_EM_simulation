@@ -80,7 +80,9 @@ def data_import(path_train: str, path_test: str):
     * returns: train_structures, train_Hy_fields, train_dielectric_permittivities, test_structures, test_Hy_fields, test_Ex_fields, test_Ez_fields, test_efficiencies, test_dielectric_permittivities
     '''
     try:
+        print('Importando datos train locales...')
         train_structures, train_Hy_fields, train_dielectric_permittivities = import_data_train(path_train)
+        print('Importando datos test locales...')
         test_structures, test_Hy_fields, test_Ex_fields, test_Ez_fields, test_efficiencies, test_dielectric_permittivities = import_data_test(path_test)
     except Exception as e:
         print('Error al importar los datos locales iniciando request...')
