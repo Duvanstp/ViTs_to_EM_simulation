@@ -24,14 +24,18 @@ if __name__ == "__main__":
 
     seq_len = train_structures.shape[2] #64
     num_features = train_structures.shape[3] #256
-    batch_size = 20
     output_channels = train_Hy_fields.shape[1]
     input_dim = num_features
     output_dim = output_channels # 2
-    num_heads = 8
+
+    # Parámetros de entrenamiento changes
+    batch_size = 300 # 27000 maximo
+    num_heads = 8 # num par [2^n]
     num_layers = 2
-    epochs = 2000
-    lr = 0.0001
+    epochs = 3
+    lr = 0.001
+    # train 27000 samples
+    # test 3000 samples
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -40,6 +44,9 @@ if __name__ == "__main__":
 
     train_data = torch.tensor(train_structures[:batch_size, :, :, :], dtype=torch.float32)
     train_labels = torch.tensor(train_Hy_fields[:batch_size, :, :, :], dtype=torch.float32)
+    # test_data = torch.tensor(train_structures[:batch_size, :, :, :], dtype=torch.float32)
+    # test_labels = torch.tensor(train_Hy_fields[:batch_size, :, :, :], dtype=torch.float32)
+
     test_data = torch.tensor(test_structures[:batch_size, :, :, :], dtype=torch.float32)
     test_labels = torch.tensor(test_Hy_fields[:batch_size, :, :, :], dtype=torch.float32)
 
@@ -48,5 +55,7 @@ if __name__ == "__main__":
 
     train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size, lr, device)
 
+    plot_structures_and_field(model.predict(train_data[:1, :, :, :]), 0, 0, 'Campo Generado', 'Tamaño horizontal', 'Tamaño vertical')
+    plot_structures_and_field(train_labels[:1, :, :, :], 0, 0, 'Campo Real', 'Tamaño horizontal', 'Tamaño vertical') # plot magnetic field
 
     print('Finalizado')

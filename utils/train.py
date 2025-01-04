@@ -23,8 +23,9 @@ def train_model(model, train_data, train_labels, test_data, test_labels, epochs,
     model = model.to(device)
 
     # Definir el optimizador y la función de pérdida
-    optimizer = optim.Adam(model.parameters(), lr=lr)
-    criterion = nn.MSELoss()  # Pérdida de error cuadrático medio
+    optimizer = optim.AdamW(model.parameters(), lr=lr)
+    criterion = nn.MSELoss()
+    # criterion = nn.SmoothL1Loss()
 
     # Crear DataLoaders para el entrenamiento y prueba
     train_dataset = TensorDataset(torch.tensor(train_data, dtype=torch.float32), torch.tensor(train_labels, dtype=torch.float32))
