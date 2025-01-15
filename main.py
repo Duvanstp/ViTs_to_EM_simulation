@@ -1,4 +1,5 @@
 import torch
+import time
 import matplotlib.pyplot as plt
 
 from utils.data_load import data_import
@@ -11,9 +12,13 @@ from transformers import ViTFeatureExtractor
 
 if __name__ == "__main__":
     print('Iniciando')
-    path_data_test = r"C:\Folder_Personal\Física\Trabajo de grado\Data_WaveYNet\test_ds.npz"
-    path_data_train = r"C:\Folder_Personal\Física\Trabajo de grado\Data_WaveYNet\train_ds.npz"
+    path_data_test = r"./data/test_ds.npz"
+    path_data_train = r"./data/train_ds.npz"
+    start_time = time.time()
     train_structures, train_Hy_fields, train_dielectric_permittivities, test_structures, test_Hy_fields, test_Ex_fields, test_Ez_fields, test_efficiencies, test_dielectric_permittivities = data_import(path_data_train, path_data_test)
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"Import data time: {execution_time:.2f} seconds")
 
     print(train_structures.shape)
     print(train_Hy_fields.shape)
@@ -31,8 +36,10 @@ if __name__ == "__main__":
     output_dim = output_channels # 2
 
     # Parámetros de entrenamiento changes
-    num_sample = int(input('Tamaño de la muestra de train: ')) # 27000 maximo
-    epochs = int(input('numero de epochs: '))
+    num_sample = 10000
+    #int(input('Tamaño de la muestra de train: ')) # 27000 maximo
+    epochs = 3
+    #int(input('numero de epochs: '))
     lr = 0.001
     # train 27000 samples
     # test 3000 samples
@@ -46,14 +53,16 @@ if __name__ == "__main__":
     test_data = torch.tensor(test_structures[:num_sample, :, :, :], dtype=torch.float32)
     test_labels = torch.tensor(test_Hy_fields[:num_sample, :, :, :], dtype=torch.float32)
 
-    model_select = int(input('Que modelo desea usar, seleccione el numero: \n 1. basic_trasformer\n 2. ModifiedViT\n'))
+    model_select = 1
+#int(input('Que modelo desea usar, seleccione el numero: \n 1. basic_trasformer\n 2. ModifiedViT\n'))
 
     if model_select == 1:
         num_heads = 8 # num par [2^n]
         num_layers = 2
         model = BasicTransformer(input_dim=input_dim, output_dim=output_dim, seq_len=seq_len, num_heads=num_heads, num_layers=num_layers)
 
-        batch_size_2 = int(input(f'Tamaño del batch, no puede ser mayor a: {num_sample}: '))
+        batch_size_2 = 1000
+#int(input(f'Tamaño del batch, no puede ser mayor a: {num_sample}: '))
 
         train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size_2 , lr, device)
 
@@ -71,7 +80,8 @@ if __name__ == "__main__":
         model = ModifiedViT(pretrained_model_name="google/vit-base-patch16-224", input_size=(1, 1,64, 256), patch_size=(16, 16), num_output_channels=2, smoothing_kernel_size=3, dropout_rate=0.2)
 
         inputs = torch.tensor(train_structures[:10, :, :, :], dtype=torch.float32)
-        batch_size_2 = int(input(f'Tamaño del batch, no puede ser mayor a: {num_sample}: '))
+        batch_size_2 = 1000
+#int(input(f'Tamaño del batch, no puede ser mayor a: {num_sample}: '))
         train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size_2, lr, device)
 
         plot_structures_and_field(model.predict(train_data[:1, :, :, :]), 0, 0, 'Campo Generado', 'Tamaño horizontal', 'Tamaño vertical')

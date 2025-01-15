@@ -7,4 +7,5 @@ def plot_structures_and_field(data, i, j, name, xname, yname):
     plt.title(name)
     plt.xlabel(xname)
     plt.ylabel(yname)
+    plt.savefig(f'{name}.png')
     plt.show()

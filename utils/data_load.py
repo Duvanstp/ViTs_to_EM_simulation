@@ -37,20 +37,34 @@ def import_data_test(path_test):
 def request_data_train(path):
     '''
     * Parameters: Path to request train data
-    * Description: This function request train data
+    * Description: This function requests train data
     * returns: train_structures, train_Hy_fields, train_dielectric_permittivities
     '''
     print('Init request train')
-    response = requests.get(path)
+    response = requests.get(path, stream=True)
     response.raise_for_status()
-    train_data = np.load(io.BytesIO(response.content))
 
-    train_structures                = train_data['structures']
-    train_Hy_fields                 = train_data['Hy_fields']
+    total_size = int(response.headers.get('content-length', 0))
+    chunk_size = max(total_size // 100, 1024)  # Define the chunk size for progress
+    downloaded_size = 0
+
+    with io.BytesIO() as buffer:
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            buffer.write(chunk)
+            downloaded_size += len(chunk)
+            percentage = (downloaded_size / total_size) * 100
+            print(f"Progress train: {percentage:.2f}%", end='\r')
+
+        buffer.seek(0)
+        train_data = np.load(buffer)
+
+    train_structures = train_data['structures']
+    train_Hy_fields = train_data['Hy_fields']
     train_dielectric_permittivities = train_data['dielectric_permittivities']
     print('Finish request train')
 
     return train_structures, train_Hy_fields, train_dielectric_permittivities
+
 
 def request_data_test(path):
     '''
