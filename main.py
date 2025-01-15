@@ -57,7 +57,7 @@ def main(args):
     elif args.model_select == 2:
         print('Implementacion de ModifiedViT')
 
-        model = ModifiedViT(pretrained_model_name="google/vit-base-patch16-224", input_size=(1, 1,64, 256), patch_size=(16, 16), num_output_channels=2, smoothing_kernel_size=3, dropout_rate=0.4)
+        model = ModifiedViT(pretrained_model_name="google/vit-base-patch16-224", input_size=(1, 1,64, 256), patch_size=(16, 16), num_output_channels=2, smoothing_kernel_size=3, dropout_rate=args.dropout_rate)
 
         # inputs = torch.tensor(train_structures[:10, :, :, :], dtype=torch.float32)
         train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size_2, lr, device)
@@ -75,6 +75,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, required=True, help="Tamaño del batch")
     parser.add_argument("--lr", type=float, default=0.001, help="Tasa de aprendizaje")
     parser.add_argument("--model_select", type=int, choices=[1, 2], required=True, help="Selecciona el modelo: 1 para BasicTransformer, 2 para ModifiedViT")
+    parser.add_argument("--dropout_rate", type=float, default=0.3, help="Tasa de dropout")
 
     args = parser.parse_args()
 
