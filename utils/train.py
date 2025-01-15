@@ -1,11 +1,12 @@
 import torch
+import os
 import torch.nn as nn
 import torch.optim as optim
 
 from tqdm import tqdm
 from torch.utils.data import DataLoader, TensorDataset
 
-def train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size, lr, device):
+def train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size, lr, device, save_path):
     """
     Entrena el modelo en los datos dados y evalúa el desempeño en el conjunto de prueba, mostrando progreso con TQDM.
 
@@ -62,6 +63,16 @@ def train_model(model, train_data, train_labels, test_data, test_labels, epochs,
         train_loss /= len(train_loader)
         print(f"Epoch [{epoch+1}/{epochs}] completed. Average Loss: {train_loss:.4f}")
 
+        if (epoch + 1) % 50 == 0:
+        # if epoch == 1:
+            checkpoint_path = os.path.join(save_path, f"model_epoch_{epoch+1}.pth")
+            torch.save({
+                'epoch': epoch + 1,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': train_loss
+            }, checkpoint_path)
+            print(f"Checkpoint saved at: {checkpoint_path}")
         # Evaluación en datos de prueba
         evaluate_model(model, test_loader, criterion, device)
 
