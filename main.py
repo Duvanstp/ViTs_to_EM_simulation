@@ -2,7 +2,7 @@ import torch
 import os
 import argparse
 import matplotlib.pyplot as plt
-
+import time
 from utils.data_load import data_import
 from utils.plots import plot_structures_and_field
 from utils.basic_transformer import BasicTransformer
