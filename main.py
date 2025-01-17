@@ -41,21 +41,26 @@ def main(args):
     current_dir = os.getcwd()
     save_path = os.path.join(current_dir, "checkpoint")
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    train_data = torch.tensor(train_structures[:num_sample, :, :, :], dtype=torch.float32)
-    train_labels = torch.tensor(train_Hy_fields[:num_sample, :, :, :], dtype=torch.float32)
+#    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
+    train_data = torch.tensor(train_structures[:num_sample, :, :, :], dtype=torch.float32).to(device)
+    train_labels = torch.tensor(train_Hy_fields[:num_sample, :, :, :], dtype=torch.float32).to(device)
     # test_data = torch.tensor(train_structures[:batch_size, :, :, :], dtype=torch.float32)
     # test_labels = torch.tensor(train_Hy_fields[:batch_size, :, :, :], dtype=torch.float32)
 
-    test_data = torch.tensor(test_structures[:num_sample, :, :, :], dtype=torch.float32)
-    test_labels = torch.tensor(test_Hy_fields[:num_sample, :, :, :], dtype=torch.float32)
+    test_data = torch.tensor(test_structures[:num_sample, :, :, :], dtype=torch.float32).to(device)
+    test_labels = torch.tensor(test_Hy_fields[:num_sample, :, :, :], dtype=torch.float32).to(device)
 
     if args.model_select == 1:
         num_heads = 8 # num par [2^n]
         num_layers = 2
-        model = BasicTransformer(input_dim=input_dim, output_dim=output_dim, seq_len=seq_len, num_heads=num_heads, num_layers=num_layers)
+        model = BasicTransformer(input_dim=input_dim, output_dim=output_dim, seq_len=seq_len, num_heads=num_heads, num_layers=num_layers).to(device)
 
+        start_time = time.time()
         train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size_2 , lr, device, save_path)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"Training time: {execution_time:.2f} seconds")
 
         plot_structures_and_field(model.predict(train_data[:1, :, :, :]), 0, 0, 'Campo Generado', 'Tamaño horizontal', 'Tamaño vertical')
         plot_structures_and_field(train_labels[:1, :, :, :], 0, 0, 'Campo Real', 'Tamaño horizontal', 'Tamaño vertical') # plot magnetic field
@@ -64,9 +69,14 @@ def main(args):
     elif args.model_select == 2:
         print('Implementacion de ModifiedViT')
 
-        model = ModifiedViT(pretrained_model_name="google/vit-base-patch16-224", input_size=(1, 1,64, 256), patch_size=(16, 16), num_output_channels=2, smoothing_kernel_size=3, dropout_rate=args.dropout_rate)
+        model = ModifiedViT(pretrained_model_name="google/vit-base-patch16-224", input_size=(1, 1,64, 256), patch_size=(16, 16), num_output_channels=2, smoothing_kernel_size=3, dropout_rate=args.dropout_rate).to(device)
         # inputs = torch.tensor(train_structures[:10, :, :, :], dtype=torch.float32)
+
+        start_time = time.time()
         train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size_2, lr, device, save_path)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"Training time: {execution_time:.2f} seconds")
 
         plot_structures_and_field(model.predict(train_data[:1, :, :, :]), 0, 0, 'Campo Generado', 'Tamaño horizontal', 'Tamaño vertical')
         plot_structures_and_field(train_labels[:1, :, :, :], 0, 0, 'Campo Real', 'Tamaño horizontal', 'Tamaño vertical') # plot magnetic field
