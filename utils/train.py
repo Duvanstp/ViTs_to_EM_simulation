@@ -1,11 +1,12 @@
 import torch
+import os
 import torch.nn as nn
 import torch.optim as optim
-
+import csv
 from tqdm import tqdm
 from torch.utils.data import DataLoader, TensorDataset
 
-def train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size, lr, device):
+def train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size, lr, device, save_path):
     """
     Entrena el modelo en los datos dados y evalúa el desempeño en el conjunto de prueba, mostrando progreso con TQDM.
 
@@ -33,6 +34,7 @@ def train_model(model, train_data, train_labels, test_data, test_labels, epochs,
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size)
+    epoch_losses = []
 
     # Ciclo de entrenamiento con barra de progreso
     for epoch in range(epochs):
@@ -60,10 +62,29 @@ def train_model(model, train_data, train_labels, test_data, test_labels, epochs,
 
         # Promedio de pérdida por época
         train_loss /= len(train_loader)
+        epoch_losses.append(train_loss)
         print(f"Epoch [{epoch+1}/{epochs}] completed. Average Loss: {train_loss:.4f}")
 
-        # Evaluación en datos de prueba
+        if (epoch + 1) % 50 == 0:
+            checkpoint_path = os.path.join(save_path, f"model_epoch_{epoch+1}.pth")
+            torch.save({
+                'epoch': epoch + 1,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': train_loss
+            }, checkpoint_path)
+            print(f"Checkpoint saved at: {checkpoint_path}")
+
+       # Evaluación en datos de prueba
         evaluate_model(model, test_loader, criterion, device)
+        csv_path = os.path.join(save_path, "train_losses.csv")
+        with open(csv_path, mode='w', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(["Epoch", "Train Loss"])
+            for epoch, loss in enumerate(epoch_losses, 1):
+                csv_writer.writerow([epoch, loss])
+
+        print(f"Training losses saved to {csv_path}")
 
 def evaluate_model(model, test_loader, criterion, device):
     model.eval()

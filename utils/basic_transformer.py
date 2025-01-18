@@ -35,6 +35,8 @@ class BasicTransformer(nn.Module):
 
 
     def forward(self, x):
+
+        x = x.to(next(self.parameters()).device)
         x = x.squeeze(1)
 
         x = self.embedding(x)
