@@ -11,7 +11,7 @@ from generate_samples import load_model
 
 def main(args):
     print('Iniciando')
-    path_data_test = r"C:\Folder_Personal\Física\Trabajo de grado\Data_WaveYNet\train_ds.npz"
+    path_data_test = r"C:\Folder_Personal\Física\Trabajo de grado\Data_WaveYNet\test_ds.npz"
     path_data_train = r"C:\Folder_Personal\Física\Trabajo de grado\Data_WaveYNet\train_ds.npz"
     start_time = time.time()
     train_structures, train_Hy_fields, train_dielectric_permittivities, test_structures, test_Hy_fields, test_Ex_fields, test_Ez_fields, test_efficiencies, test_dielectric_permittivities = data_import(path_data_train, path_data_test)
@@ -53,8 +53,10 @@ def main(args):
     print('Implementacion de ModifiedViT')
 
     checkpoint_path = r'checkpoint/model_epoch_50.pth'
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model, optimizer, epoch, loss = load_model(checkpoint_path, device=device)
+
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
 
     start_time = time.time()
     train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size_2, lr, device, save_path, optimizer)
@@ -62,8 +64,8 @@ def main(args):
     execution_time = end_time - start_time
     print(f"Training time: {execution_time:.2f} seconds")
 
-    plot_structures_and_field(model.predict(train_data[:1, :, :, :]), 0, 0, 'Campo Generado', 'Tamaño horizontal', 'Tamaño vertical')
-    plot_structures_and_field(train_labels[:1, :, :, :], 0, 0, 'Campo Real', 'Tamaño horizontal', 'Tamaño vertical') # plot magnetic field
+    plot_structures_and_field(model.predict(train_data[5:6, :, :, :]), 0, 0, 'Campo Generado', 'Tamaño horizontal', 'Tamaño vertical')
+    plot_structures_and_field(train_labels[5:6, :, :, :], 0, 0, 'Campo Real', 'Tamaño horizontal', 'Tamaño vertical') # plot magnetic field
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script de entrenamiento para inference de magnetic field")
