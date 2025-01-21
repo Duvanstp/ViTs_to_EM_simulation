@@ -39,11 +39,11 @@ if __name__ == '__main__':
     train_structures, train_Hy_fields, train_dielectric_permittivities, test_structures, test_Hy_fields, test_Ex_fields, test_Ez_fields, test_efficiencies, test_dielectric_permittivities = data_import(path_data_train, path_data_test)
 
     device = torch.device("cpu")
-    train_data = torch.tensor(train_structures[:10, :, :, :], dtype=torch.float32).to(device)
-    train_labels = torch.tensor(train_Hy_fields[:10, :, :, :], dtype=torch.float32).to(device)
+    train_data = torch.tensor(train_structures[:1, :, :, :], dtype=torch.float32).to(device)
+    train_labels = torch.tensor(train_Hy_fields[:1, :, :, :], dtype=torch.float32).to(device)
 
-    test_data = torch.tensor(test_structures[:10, :, :, :], dtype=torch.float32).to(device)
-    test_labels = torch.tensor(test_Hy_fields[:10, :, :, :], dtype=torch.float32).to(device)
+    test_data = torch.tensor(test_structures[:1, :, :, :], dtype=torch.float32).to(device)
+    test_labels = torch.tensor(test_Hy_fields[:1, :, :, :], dtype=torch.float32).to(device)
 
-    plot_structures_and_field(model.predict(train_data[:1, :, :, :]), 0, 0, 'Campo Generado', 'Tamaño horizontal', 'Tamaño vertical')
-    plot_structures_and_field(train_labels[:1, :, :, :], 0, 0, 'Campo Real', 'Tamaño horizontal', 'Tamaño vertical')
+    plot_structures_and_field(model.predict(test_data[:1, :, :, :]), 0, 1, 'Campo Generado muestra test 1', 'Tamaño horizontal', 'Tamaño vertical')
+    plot_structures_and_field(test_labels[:1, :, :, :], 0, 1, 'Campo Imaginario muestra test 1', 'Tamaño horizontal', 'Tamaño vertical')

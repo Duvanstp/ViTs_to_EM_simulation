@@ -6,7 +6,7 @@ import csv
 from tqdm import tqdm
 from torch.utils.data import DataLoader, TensorDataset
 
-def train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size, lr, device, save_path):
+def train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size, lr, device, save_path, optimizer = None):
     """
     Entrena el modelo en los datos dados y evalúa el desempeño en el conjunto de prueba, mostrando progreso con TQDM.
 
@@ -23,8 +23,11 @@ def train_model(model, train_data, train_labels, test_data, test_labels, epochs,
     # Mover el modelo al dispositivo
     model = model.to(device)
 
+    if optimizer is None:
     # Definir el optimizador y la función de pérdida
-    optimizer = optim.AdamW(model.parameters(), lr=lr)
+        optimizer = optim.AdamW(model.parameters(), lr=lr)
+
+    
     criterion = nn.MSELoss()
     # criterion = nn.SmoothL1Loss()
 
@@ -65,8 +68,8 @@ def train_model(model, train_data, train_labels, test_data, test_labels, epochs,
         epoch_losses.append(train_loss)
         print(f"Epoch [{epoch+1}/{epochs}] completed. Average Loss: {train_loss:.4f}")
 
-        if (epoch + 1) % 50 == 0:
-            checkpoint_path = os.path.join(save_path, f"model_epoch_{epoch+1}.pth")
+        if (epoch + 1) % 20 == 0:
+            checkpoint_path = os.path.join(save_path, f"model_epoch_50_to_{epoch+1}.pth")
             torch.save({
                 'epoch': epoch + 1,
                 'model_state_dict': model.state_dict(),

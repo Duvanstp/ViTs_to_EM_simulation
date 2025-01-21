@@ -5,10 +5,9 @@ import matplotlib.pyplot as plt
 import time
 from utils.data_load import data_import
 from utils.plots import plot_structures_and_field
-from utils.basic_transformer import BasicTransformer
 from utils.train import train_model
 from utils.transformer_preentrened import ModifiedViT
-from transformers import ViTFeatureExtractor
+from generate_samples import load_model
 
 def main(args):
     print('Iniciando')
@@ -51,37 +50,21 @@ def main(args):
     test_data = torch.tensor(test_structures[:, :, :, :], dtype=torch.float32).to(device)
     test_labels = torch.tensor(test_Hy_fields[:, :, :, :], dtype=torch.float32).to(device)
 
-    if args.model_select == 1:
-        num_heads = 8 # num par [2^n]
-        num_layers = 2
-        model = BasicTransformer(input_dim=input_dim, output_dim=output_dim, seq_len=seq_len, num_heads=num_heads, num_layers=num_layers).to(device)
+    print('Implementacion de ModifiedViT')
 
-        start_time = time.time()
-        train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size_2 , lr, device, save_path)
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print(f"Training time: {execution_time:.2f} seconds")
+    checkpoint_path = r'checkpoint/model_epoch_50.pth'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model, optimizer, epoch, loss = load_model(checkpoint_path, device=device)
 
-        plot_structures_and_field(model.predict(train_data[:1, :, :, :]), 0, 0, 'Campo Generado', 'Tamaño horizontal', 'Tamaño vertical')
-        plot_structures_and_field(train_labels[:1, :, :, :], 0, 0, 'Campo Real', 'Tamaño horizontal', 'Tamaño vertical') # plot magnetic field
+    start_time = time.time()
+    train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size_2, lr, device, save_path, optimizer)
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"Training time: {execution_time:.2f} seconds")
 
-        print('Finalizado')
-    elif args.model_select == 2:
-        print('Implementacion de ModifiedViT')
+    plot_structures_and_field(model.predict(train_data[:1, :, :, :]), 0, 0, 'Campo Generado', 'Tamaño horizontal', 'Tamaño vertical')
+    plot_structures_and_field(train_labels[:1, :, :, :], 0, 0, 'Campo Real', 'Tamaño horizontal', 'Tamaño vertical') # plot magnetic field
 
-        model = ModifiedViT(pretrained_model_name="google/vit-base-patch16-224", input_size=(1, 1,64, 256), patch_size=(16, 16), num_output_channels=2, smoothing_kernel_size=3, dropout_rate=args.dropout_rate).to(device)
-        # inputs = torch.tensor(train_structures[:10, :, :, :], dtype=torch.float32)
-
-        start_time = time.time()
-        train_model(model, train_data, train_labels, test_data, test_labels, epochs, batch_size_2, lr, device, save_path)
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print(f"Training time: {execution_time:.2f} seconds")
-
-        plot_structures_and_field(model.predict(train_data[:1, :, :, :]), 0, 0, 'Campo Generado', 'Tamaño horizontal', 'Tamaño vertical')
-        plot_structures_and_field(train_labels[:1, :, :, :], 0, 0, 'Campo Real', 'Tamaño horizontal', 'Tamaño vertical') # plot magnetic field
-    else:
-        print('No ha seleccionado un modelo valido')
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script de entrenamiento para inference de magnetic field")
 
@@ -89,7 +72,6 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", type=int, required=True, help="Número de épocas")
     parser.add_argument("--batch_size", type=int, required=True, help="Tamaño del batch")
     parser.add_argument("--lr", type=float, default=0.001, help="Tasa de aprendizaje")
-    parser.add_argument("--model_select", type=int, choices=[1, 2], required=True, help="Selecciona el modelo: 1 para BasicTransformer, 2 para ModifiedViT")
     parser.add_argument("--dropout_rate", type=float, default=0.4, help="Tasa de dropout")
 
     args = parser.parse_args()
