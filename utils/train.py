@@ -65,7 +65,7 @@ def train_model(model, train_data, train_labels, test_data, test_labels, epochs,
         epoch_losses.append(train_loss)
         print(f"Epoch [{epoch+1}/{epochs}] completed. Average Loss: {train_loss:.4f}")
 
-        if (epoch + 1) % 50 == 0:
+        if (epoch + 1) % 10 == 0:
             checkpoint_path = os.path.join(save_path, f"model_epoch_{epoch+1}.pth")
             torch.save({
                 'epoch': epoch + 1,

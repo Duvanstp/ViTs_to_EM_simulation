@@ -4,3 +4,4 @@ __pycache__/
 vits/
 data/
 nohup.out
+checkpoint/
