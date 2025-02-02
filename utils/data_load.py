@@ -99,7 +99,7 @@ def data_import(path_train: str, path_test: str):
         print('Importando datos test locales...')
         test_structures, test_Hy_fields, test_Ex_fields, test_Ez_fields, test_efficiencies, test_dielectric_permittivities = import_data_test(path_test)
     except Exception as e:
-        print('Error al importar los datos locales iniciando request...')
+        print(f'Error {e} al importar los datos locales iniciando request...')
         path_train_request = 'http://metanet.stanford.edu/static/search/waveynet/data/train_ds.npz'
         path_test_request = 'http://metanet.stanford.edu/static/search/waveynet/data/test_ds.npz'
 
