@@ -37,10 +37,12 @@ class ModifiedViT(nn.Module):
         self.input_size = input_size
 
     def forward(self, x):
+        batch_size = x.size(0)
+        
         outputs = self.vit(pixel_values=x)
         cls_output = outputs.last_hidden_state[:, 1:, :]
 
-        batch_size = x.size(0)
+        
         output = self.fc_out(cls_output)
         
         output = self.dropout(output)
